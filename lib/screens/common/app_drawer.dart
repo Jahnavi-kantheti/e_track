@@ -8,6 +8,8 @@ import 'package:e_track/utils/storagebox.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../utils/global.dart';
+
 class AppDrawer extends StatelessWidget {
   const AppDrawer({
     super.key,
@@ -68,7 +70,7 @@ class AppDrawer extends StatelessWidget {
                 Get.back();
               },
             ),
-            ListTile(
+           StorageBox.instance.isAdmin() ? ListTile(
               title: const Text(
                 'Employees',
                 style: TextStyle(color: colorBlack, fontSize: 16),
@@ -80,7 +82,8 @@ class AppDrawer extends StatelessWidget {
                   Get.to(() => const EmployeesScreen());
                 });
               },
-            ),
+            ) : SizedBox(),
+            !StorageBox.instance.isAdmin() ?
             ListTile(
               title: const Text(
                 'Change Password',
@@ -95,7 +98,7 @@ class AppDrawer extends StatelessWidget {
                   Get.to(() => const ChangePasswordScreen());
                 });
               },
-            ),
+            ) : SizedBox(),
             ListTile(
               title: const Text(
                 'Log out',
@@ -105,7 +108,7 @@ class AppDrawer extends StatelessWidget {
                 ),
               ),
               onTap: () {
-                controller.logOut();
+                logOut();
               },
             ),
             ListTile(

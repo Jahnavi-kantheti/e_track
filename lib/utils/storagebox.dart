@@ -23,7 +23,19 @@ class StorageBox {
     return _box.read("USERNAME") ?? '';
   }
 
-  /*setFetchLocation(bool value) {
+  setIsAdmin(bool value) {
+    _box.write("IsAdmin", value);
+  }
+
+  bool isAdmin() {
+    return _box.read("IsAdmin") ?? false;
+  }
+
+  clear() async {
+    await _box.erase();
+  }
+
+/*setFetchLocation(bool value) {
     _box.write("FETCH_LOCATION", value);
   }
 

@@ -1,3 +1,4 @@
+import 'package:e_track/screens/employees/employees_screen.dart';
 import 'package:e_track/utils/storagebox.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -24,13 +25,16 @@ class AuthController extends GetxController {
       if (response.statusCode == 200) {
         print('API call successful: ${response.data}');
         StorageBox.instance.setToken("value");
+        StorageBox.instance.setIsAdmin(email == "admin");
       } else {
         StorageBox.instance.setToken("123");
+        StorageBox.instance.setIsAdmin(email == "admin");
         print('API call failed: ${response.statusMessage}');
         showToast(message: response.statusMessage ?? networkErrorMsg);
       }
     } catch (e) {
       StorageBox.instance.setToken("123");
+      StorageBox.instance.setIsAdmin(email == "admin");
       print('Network error occurred: $e');
       showToast(message: e.toString());
       StorageBox.instance.setUserName("Prudhvi Sai");

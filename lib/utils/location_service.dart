@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:ui';
 
 import 'package:e_track/network/api_service.dart';
 import 'package:e_track/utils/global.dart';
@@ -8,41 +7,53 @@ import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:flutter_background_service_android/flutter_background_service_android.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:intl/intl.dart';
+import 'package:location/location.dart';
 
 import '../models/user.dart';
 import 'strings.dart';
 
-Future<bool> handleLocationPermission() async {
+Future<bool> handleLocationPermission(bool isSilent) async {
   bool serviceEnabled;
-  LocationPermission permission;
+  bool permission;
 
   serviceEnabled = await Geolocator.isLocationServiceEnabled();
   if (!serviceEnabled) {
-    showToast(
-        message: 'Location services are disabled. Please enable the services');
-    return false;
-  }
-  permission = await Geolocator.checkPermission();
-  if (permission == LocationPermission.denied) {
-    permission = await Geolocator.requestPermission();
-    if (permission == LocationPermission.denied) {
-      showToast(message: 'Location permissions are denied');
+    serviceEnabled = await Location().requestService();
+    if (!serviceEnabled) {
+      if (!isSilent) {
+        showToast(
+            message:
+                'Location services are disabled. Please enable the services');
+      }
       return false;
     }
   }
-  if (permission == LocationPermission.deniedForever) {
+  permission = await Geolocator.checkPermission() == LocationPermission.denied;
+  if (permission) {
+    permission =
+        await Geolocator.requestPermission() == LocationPermission.denied;
+    if (permission) {
+      if (!isSilent) {
+        showToast(message: 'Location permissions are denied');
+      }
+      return false;
+    }
+  }
+  /*if (permission == LocationPermission.deniedForever) {
     showToast(
         message:
             'Location permissions are permanently denied, we cannot request permissions.');
     return false;
-  }
+  }*/
   return true;
 }
 
-Future<Position?> getCurrentPosition() async {
+Future<LatLng?> getCurrentPosition() async {
   try {
-    return await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high, forceAndroidLocationManager: true);
+    Position? ld = await Geolocator.getCurrentPosition();
+    return LatLng(ld?.latitude ?? 0.0, ld?.longitude ?? 0.0);
   } catch (e) {
     print(e);
     return null;
@@ -56,7 +67,7 @@ Future<void> initializeService() async {
   const AndroidNotificationChannel channel = AndroidNotificationChannel(
     appName, // id
     notificationTitle, // title
-    importance: Importance.high, // importance must be at low or higher level
+    importance: Importance.low, // importance must be at low or higher level
   );
 
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
@@ -110,7 +121,7 @@ Future<void> initializeService() async {
 @pragma('vm:entry-point')
 Future<bool> onIosBackground(ServiceInstance service) async {
   WidgetsFlutterBinding.ensureInitialized();
-  DartPluginRegistrant.ensureInitialized();
+  // DartPluginRegistrant.ensureInitialized();
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
 
@@ -122,7 +133,7 @@ Future<bool> onIosBackground(ServiceInstance service) async {
 @pragma('vm:entry-point')
 void onStart(ServiceInstance service) async {
   // Only available for flutter 3.0.0 and later
-  DartPluginRegistrant.ensureInitialized();
+  // DartPluginRegistrant.ensureInitialized();
 
   // For flutter prior to version 3.0.0
   // We have to register the plugin manually
@@ -157,23 +168,21 @@ void onStart(ServiceInstance service) async {
 
 Future<void> getLocation(
     FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin) async {
-  Position? position = await getCurrentPosition();
+  LatLng? position = await getCurrentPosition();
   String body = "";
   if (position != null) {
-    body = "${position.latitude} , ${position.longitude}";
+    body = "last synced at ${DateFormat("hh:mm a").format(DateTime.now())}";
     print('FLUTTER BACKGROUND SERVICE: ${DateTime.now()}');
 
     // API Call
-    final response =
-    await ApiService.instance.request('/users', DioMethod.get);
+    final response = await ApiService.instance.request('/users', DioMethod.get);
     final List<UserResponse> users = response.data
         .map<UserResponse>((e) => UserResponse.fromJson(e))
         .toList();
 
     print(users.map((e) => e.name));
-
   } else {
-    body = "Error";
+    body = "Problem occurred, please check mobile GPS";
     print('FLUTTER BACKGROUND SERVICE Error: ${DateTime.now()}');
   }
 
@@ -212,4 +221,19 @@ Future<void> startLocationService() async {
     service.invoke("setAsForeground");
     service.startService();
   }
+}
+
+void retrieveLatLng() async {
+  final hasPermission = await handleLocationPermission(false);
+  if (!hasPermission) return;
+  LatLng? position = await getCurrentPosition();
+  print("Sign In ${position?.latitude} ${position?.longitude}");
+  // call sign in API
+
+  if (await isLocationServiceRunning()) {
+    await stopLocationService();
+    return;
+  }
+
+  await startLocationService();
 }

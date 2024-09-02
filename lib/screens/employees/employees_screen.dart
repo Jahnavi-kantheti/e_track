@@ -1,9 +1,11 @@
+import 'package:e_track/models/user.dart';
 import 'package:e_track/screens/add_employee/add_employee_screen.dart';
-import 'package:e_track/screens/employee_tracking/employee_track_screen.dart';
 import 'package:e_track/screens/employees/employee_controller.dart';
 import 'package:e_track/utils/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
+import '../employee_tracking/employee_track_screen.dart';
 
 class EmployeesScreen extends StatefulWidget {
   const EmployeesScreen({super.key});
@@ -18,9 +20,9 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_){
-    controller.fetchUsers();
-  });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      controller.fetchUsers();
+    });
   }
 
   @override
@@ -44,20 +46,19 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
         ),
         elevation: 0,
       ),
-      body: SafeArea(
-          child: ListView(
-        children: [
-          const ListTile(
-            title: Text("Jahnavi Rani"),
-            subtitle: Text("Jahnavi@gmail.com"),
-          ),
-          ListTile(
-            title: const Text("Prudhvi K"),
-            subtitle: const Text("pk@gmail.com"),trailing: TextButton(onPressed: (){
+      body: SafeArea(child: Obx(
+          ()=> ListView.builder(
+            itemCount: controller.dateUsers.length,
+          itemBuilder: (context, index) {
+              UserResponse user = controller.dateUsers[index];
+            return ListTile(
+              title: Text(user.name),
+              subtitle: Text(user.email),trailing: TextButton(onPressed: (){
               Get.to(() => const EmployeeTrackScreen());
-          }, child: const Text("Track")),
-          )
-        ],
+            }, child: const Text("Track")),
+            );
+          },
+        ),
       )),
     );
   }

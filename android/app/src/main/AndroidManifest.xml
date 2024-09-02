@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
-        android:label="E Track"
+        android:label="ETrack"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
 
@@ -39,6 +39,8 @@
 
         <meta-data android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyCuq1z1GjG84lrm3wyxLTL95LxjidQ8ZG4"/>
+
+        <receiver android:exported="false" android:name="com.dexterous.flutterlocalnotifications.ActionBroadcastReceiver" />
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility?hl=en and
@@ -59,4 +61,5 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
 </manifest>

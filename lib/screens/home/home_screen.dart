@@ -4,6 +4,7 @@ import 'package:e_track/utils/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../utils/location_service.dart';
 import '../../utils/storagebox.dart';
 import '../common/app_drawer.dart';
 import '../common/swipesview.dart';
@@ -118,7 +119,7 @@ class HomeScreen extends StatelessWidget {
                                 MyButton(
                                     label: "Sign In",
                                     onPress: () {
-                                      controller.retrieveLatLng();
+                                      retrieveLatLng();
                                     })
                               ],
                             )

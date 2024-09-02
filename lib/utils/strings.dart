@@ -5,8 +5,8 @@ const notificationIconName = 'ic_bg_service_small';
 
 
 // Strings
-const appName = "E-Track";
-const notificationTitle = "E-Track Location Service";
+const appName = "ETrack";
+const notificationTitle = "ETrack is running";
 const networkErrorMsg = "Something went wrong, please try again";
 
 

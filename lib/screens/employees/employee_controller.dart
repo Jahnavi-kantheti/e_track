@@ -1,13 +1,10 @@
-import 'dart:convert';
-
 import 'package:e_track/models/user.dart';
 import 'package:e_track/network/api_service.dart';
 import 'package:e_track/utils/global.dart';
 import 'package:get/get.dart';
 
 class EmployeeController extends GetxController {
-  final _users = RxList<UserResponse>([]);
-
+  final dateUsers = RxList<UserResponse>([]);
 
   void fetchUsers() async {
     try {
@@ -19,6 +16,7 @@ class EmployeeController extends GetxController {
           .toList();
 
       print(users.map((e) => e.email));
+      dateUsers.value = users;
       dismissLoader();
     } catch (e) {
       dismissLoader();
