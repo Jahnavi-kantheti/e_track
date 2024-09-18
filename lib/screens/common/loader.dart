@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class Loader extends StatelessWidget {
@@ -5,14 +6,10 @@ class Loader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 50,
-      height: 50,
-      child: Material(
-        elevation: 10,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        child: const Center(child: CircularProgressIndicator()),
-      ),
-    );
+    return const Center(
+        child: CupertinoActivityIndicator(
+      color: Colors.white,
+      radius: 16,
+    ));
   }
 }

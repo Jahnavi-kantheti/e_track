@@ -4,8 +4,10 @@ import 'package:get/get.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 import '../../utils/location_service.dart';
+import '../common/loader.dart';
 
 class HomeController extends GetxController {
+
   final Rx<Date> _date = Rx<Date>(Date());
   final Rx<PackageInfo> _info = Rx<PackageInfo>(PackageInfo(
       appName: '',

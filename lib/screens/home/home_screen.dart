@@ -58,7 +58,7 @@ class HomeScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Hi ${StorageBox.instance.getUserName().split(" ")[0]} 👋',
+                      'Hi ${StorageBox.instance.getFullName().split(" ")[0]} 👋',
                       style: const TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
@@ -75,56 +75,55 @@ class HomeScreen extends StatelessWidget {
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10)),
                         child: Padding(
-                          padding: const EdgeInsets.all(20.0),
-                          child: Row(children: [
-                            CircleAvatar(
-                              radius: 60,
-                              child: Obx(
-                                () => Text(
-                                  controller
-                                      .getDateValue()
-                                      .time
-                                      .replaceAll("", " "),
-                                  style: const TextStyle(
-                                      fontSize: 14,
-                                      color: colorPrimaryDark,
-                                      fontWeight: FontWeight.w600),
+                            padding: const EdgeInsets.all(20.0),
+                            child: Row(children: [
+                              CircleAvatar(
+                                radius: 60,
+                                child: Obx(
+                                  () => Text(
+                                    controller
+                                        .getDateValue()
+                                        .time
+                                        .replaceAll("", " "),
+                                    style: const TextStyle(
+                                        fontSize: 14,
+                                        color: colorPrimaryDark,
+                                        fontWeight: FontWeight.w600),
+                                  ),
                                 ),
                               ),
-                            ),
-                            const Spacer(),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                Text(
-                                  controller.getDateValue().day,
-                                  style: const TextStyle(
-                                      fontSize: 14,
-                                      color: colorPrimaryDark,
-                                      fontWeight: FontWeight.w600),
-                                ),
-                                const SizedBox(
-                                  height: 5,
-                                ),
-                                Text(
-                                  controller.getDateValue().date,
-                                  style: const TextStyle(
-                                      fontSize: 14,
-                                      color: colorPrimaryDark,
-                                      fontWeight: FontWeight.w300),
-                                ),
-                                const SizedBox(
-                                  height: 10,
-                                ),
-                                MyButton(
-                                    label: "Sign In",
-                                    onPress: () {
-                                      retrieveLatLng();
-                                    })
-                              ],
-                            )
-                          ]),
-                        )),
+                              const Spacer(),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  Text(
+                                    controller.getDateValue().day,
+                                    style: const TextStyle(
+                                        fontSize: 14,
+                                        color: colorPrimaryDark,
+                                        fontWeight: FontWeight.w600),
+                                  ),
+                                  const SizedBox(
+                                    height: 5,
+                                  ),
+                                  Text(
+                                    controller.getDateValue().date,
+                                    style: const TextStyle(
+                                        fontSize: 14,
+                                        color: colorPrimaryDark,
+                                        fontWeight: FontWeight.w300),
+                                  ),
+                                  const SizedBox(
+                                    height: 10,
+                                  ),
+                                  MyButton(
+                                      label: "Sign In",
+                                      onPress: () {
+                                        retrieveLatLng();
+                                      })
+                                ],
+                              )
+                            ]))),
                     const SizedBox(
                       height: 20,
                     ),

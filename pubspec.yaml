@@ -52,6 +52,15 @@ dependencies:
   google_maps_flutter: ^2.9.0
   location: ^6.0.2
   disable_battery_optimization: ^1.1.1
+  encrypt: ^5.0.3
+  email_validator: ^3.0.0
+  analyzer: ^6.7.0
+  image_picker: ^1.1.2
+  internet_connection_checker: ^2.0.0
+  http_parser: ^4.0.2
+  logger: ^2.4.0
+  app_settings: ^5.1.1
+
 
 dev_dependencies:
   flutter_test:

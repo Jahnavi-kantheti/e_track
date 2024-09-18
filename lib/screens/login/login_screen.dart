@@ -2,15 +2,32 @@ import 'package:e_track/screens/common/edittext.dart';
 import 'package:e_track/screens/common/mybutton.dart';
 import 'package:e_track/screens/login/authcontroller.dart';
 import 'package:e_track/utils/colors.dart';
+import 'package:e_track/utils/global.dart';
+import 'package:e_track/utils/storagebox.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../utils/strings.dart';
 
-class LoginScreen extends StatelessWidget {
-  LoginScreen({super.key});
+class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
 
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
   final controller = Get.put(AuthController());
+
+  @override
+  void initState() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (StorageBox.instance.getUserId().isNotNullOrEmpty) {
+        controller.autoLogin();
+      }
+    });
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +35,7 @@ class LoginScreen extends StatelessWidget {
       backgroundColor: colorPrimaryDark,
       body: SafeArea(
           child: Padding(
-        padding: EdgeInsets.only(left: 10, right: 10, top: Get.height * 0.1),
+        padding: EdgeInsets.only(left: 10, right: 10, top: Get.height * 0.12),
         child: SingleChildScrollView(
           child: Card(
             semanticContainer: true,
@@ -55,7 +72,7 @@ class LoginScreen extends StatelessWidget {
                     height: 10,
                   ),
                   EditText(
-                    label: 'Email',
+                    label: 'Username',
                     controller: controller.emailTextController,
                   ),
                   const SizedBox(

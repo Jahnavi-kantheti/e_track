@@ -1,8 +1,12 @@
 import 'package:e_track/models/internal/date.dart';
 import 'package:e_track/screens/common/loader.dart';
 import 'package:e_track/utils/storagebox.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:intl/intl.dart';
+import 'package:logger/logger.dart';
 
 import '../screens/login/login_screen.dart';
 import 'colors.dart';
@@ -33,17 +37,55 @@ String getTime(DateTime? date) {
 
 Future<void> logOut() async {
   await stopLocationService();
+  String deviceId = StorageBox.instance.getDeviceID();
+  await StorageBox.instance.clear();
+  await StorageBox.instance.setDeviceID(deviceId);
   Get.back();
-  StorageBox.instance.clear();
   Get.off(() => LoginScreen());
 }
 
+extension StringExtensions on String? {
+  bool get isNullOrEmpty {
+    return this == null || this!.isEmpty;
+  }
+
+  bool get isNotNullOrEmpty {
+    return !isNullOrEmpty;
+  }
+}
+
+DropdownMenuItem<dynamic> defaultDropdown() {
+  return const DropdownMenuItem(
+    value: '-1',
+    child: Text('Select', style: TextStyle(fontSize: 14, color: colorBlack)),
+  );
+}
+
+Future<bool> isInternetAvailable() async {
+  bool isConnected = await InternetConnectionChecker().hasConnection;
+  return isConnected;
+}
+
+final _logger = Logger(
+  printer: PrettyPrinter(methodCount: 0),
+);
+
+void kPrintLog(Object? message) {
+  if (kDebugMode) {
+    _logger.i(message);
+  }
+}
+
 showLoader() {
-  Get.dialog(const Loader(), barrierDismissible: false);
+  kPrintLog("showloader");
+  Get.dialog(const PopScope(canPop: false, child: Loader()),
+      barrierDismissible: false);
 }
 
 dismissLoader() {
+  kPrintLog("dismiss loader 1");
   if (Get.isDialogOpen == true) {
-    Get.back();
+    kPrintLog("dismiss loader 2");
+    Navigator.of(Get.overlayContext!, rootNavigator: true).pop();
   }
 }

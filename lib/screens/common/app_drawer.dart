@@ -3,7 +3,6 @@ import 'package:e_track/screens/employees/employee_controller.dart';
 import 'package:e_track/screens/employees/employees_screen.dart';
 import 'package:e_track/screens/home/homecontroller.dart';
 import 'package:e_track/utils/colors.dart';
-import 'package:e_track/utils/location_service.dart';
 import 'package:e_track/utils/storagebox.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -34,21 +33,24 @@ class AppDrawer extends StatelessWidget {
                   CircleAvatar(
                     backgroundColor: colorWhite,
                     radius: 36,
-                    child: Image.asset(
-                        width: 36, height: 36, "assets/images/icons/user.png"),
+                    backgroundImage: getProfileImage(),
                   ),
                   const Spacer(),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.center,
+                  Wrap(
+                    alignment: WrapAlignment.center,
                     children: [
-                      Obx(
-                        () =>
-                        Icon(controller.isSyncing.value ? Icons.sync : Icons.sync_disabled, size: 20,color: colorWhite,)
+                      Obx(() => Icon(
+                            controller.isSyncing.value
+                                ? Icons.sync
+                                : Icons.sync_disabled,
+                            size: 20,
+                            color: colorWhite,
+                          )),
+                      const SizedBox(
+                        width: 10,
                       ),
-                      const SizedBox(width: 10,),
                       Text(
-                        StorageBox.instance.getUserName(),
+                        StorageBox.instance.getFullName(),
                         textAlign: TextAlign.center,
                         style: const TextStyle(
                             color: colorWhite,
@@ -70,20 +72,22 @@ class AppDrawer extends StatelessWidget {
                 Get.back();
               },
             ),
-           StorageBox.instance.isAdmin() ? ListTile(
-              title: const Text(
-                'Employees',
-                style: TextStyle(color: colorBlack, fontSize: 16),
-              ),
-              onTap: () async {
-                Get.back();
-                await Future.delayed(const Duration(milliseconds: 400), () {
-                  Get.delete<EmployeeController>();
-                  Get.to(() => const EmployeesScreen());
-                });
-              },
-            ) : SizedBox(),
-            !StorageBox.instance.isAdmin() ?
+            StorageBox.instance.isAdmin()
+                ? ListTile(
+                    title: const Text(
+                      'Employees',
+                      style: TextStyle(color: colorBlack, fontSize: 16),
+                    ),
+                    onTap: () async {
+                      Get.back();
+                      await Future.delayed(const Duration(milliseconds: 400),
+                          () {
+                        Get.delete<EmployeeController>();
+                        Get.to(() => const EmployeesScreen());
+                      });
+                    },
+                  )
+                : SizedBox(),
             ListTile(
               title: const Text(
                 'Change Password',
@@ -94,11 +98,13 @@ class AppDrawer extends StatelessWidget {
               ),
               onTap: () async {
                 Get.back();
-                await Future.delayed(const Duration(milliseconds: 400), () {
-                  Get.to(() => const ChangePasswordScreen());
-                });
+                await Future.delayed(const Duration(milliseconds: 400),
+                        () {
+                      Get.to(() => ChangePasswordScreen());
+                    });
               },
-            ) : SizedBox(),
+            )
+            ,
             ListTile(
               title: const Text(
                 'Log out',
@@ -122,5 +128,14 @@ class AppDrawer extends StatelessWidget {
             ),
           ],
         ));
+  }
+
+  ImageProvider getProfileImage() {
+    var profilePic = StorageBox.instance.getProfilePic();
+    if (profilePic.isNotNullOrEmpty) {
+      return NetworkImage(profilePic!);
+    } else {
+      return const AssetImage("assets/images/icons/user.png");
+    }
   }
 }

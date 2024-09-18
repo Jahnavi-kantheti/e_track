@@ -1,5 +1,5 @@
-import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:e_track/utils/global.dart';
 import 'package:flutter/foundation.dart';
 
 enum DioMethod { post, get, put, delete }
@@ -11,7 +11,7 @@ class ApiService {
 
   String get baseUrl {
     if (kDebugMode) {
-      return 'https://jsonplaceholder.typicode.com';
+      return 'https://api.pragatiutrack.com/api/';
     }
 
     return 'production url';
@@ -22,47 +22,62 @@ class ApiService {
     DioMethod method, {
     Map<String, dynamic>? param,
     String? contentType,
-    formData,
+    dynamic formData,
   }) async {
+    if (!await isInternetAvailable()) {
+      throw Exception("Internet not available");
+    }
     try {
       final dio = Dio(
         BaseOptions(
           baseUrl: baseUrl,
-          contentType: contentType ?? Headers.formUrlEncodedContentType,
           headers: {
-            HttpHeaders.authorizationHeader: 'Bearer ',
+            'X-Api-Key': 'FEA3E5D0QFCEBFD54F0A6A674ECAE3F8',
           },
         ),
       );
+      kPrintLog(dio.options.baseUrl + endpoint);
+      kPrintLog("Params: $param");
+      kPrintLog("FormData: $formData");
       switch (method) {
         case DioMethod.post:
-          return dio.post(
+          Response res = await dio.post(
             endpoint,
-            data: param ?? formData,
+            data: param ?? FormData.fromMap(formData),
           );
+          kPrintLog(res);
+          return res;
         case DioMethod.get:
-          return dio.get(
+          Response res = await dio.get(
             endpoint,
             queryParameters: param,
           );
+          kPrintLog(res);
+          return res;
         case DioMethod.put:
-          return dio.put(
+          Response res = await dio.put(
             endpoint,
-            data: param ?? formData,
+            data: param ?? FormData.fromMap(formData),
           );
+          kPrintLog(res);
+          return res;
         case DioMethod.delete:
-          return dio.delete(
+          Response res = await dio.delete(
             endpoint,
-            data: param ?? formData,
+            data: param ?? FormData.fromMap(formData),
           );
+          kPrintLog(res);
+          return res;
         default:
-          return dio.post(
+          Response res = await dio.post(
             endpoint,
-            data: param ?? formData,
+            data: param ?? FormData.fromMap(formData),
           );
+          kPrintLog(res);
+          return res;
       }
     } catch (e) {
-      throw Exception('Network error');
+      throw Exception(e.toString());
     }
   }
 }

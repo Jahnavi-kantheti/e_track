@@ -1,4 +1,5 @@
-import 'package:e_track/screens/employees/employees_screen.dart';
+import 'package:e_track/models/auth_response.dart';
+import 'package:e_track/utils/encryption.dart';
 import 'package:e_track/utils/storagebox.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -9,37 +10,70 @@ import '../../utils/strings.dart';
 import '../home/home_screen.dart';
 
 class AuthController extends GetxController {
-  final emailTextController = TextEditingController();
-  final passwordTextController = TextEditingController();
+  final emailTextController = TextEditingController(text: '');
+  final passwordTextController = TextEditingController(text: "");
 
   void doLogin() async {
     final email = emailTextController.text;
-    final password = emailTextController.text;
+    String? password = passwordTextController.text;
+    if (email.isEmpty || password.isEmpty) {
+      showToast(message: "Please enter Username/Password");
+      return;
+    }
+    password = aesEncrypt(password);
+    await authenticate(email, password);
+  }
+
+  Future<void> authenticate(String email, String? password) async {
+    showLoader();
     try {
       final response = await ApiService.instance.request(
-        '/api/endpoint',
+        '/user/user_secure_login',
         DioMethod.post,
-        param: {'email': email, 'password': password},
+        formData: {
+          'mobile_number': email,
+          'user_type': 'Customer',
+          'password': password,
+          'device_token': StorageBox.instance.getDeviceID()
+        },
         contentType: 'application/json',
       );
+      dismissLoader();
       if (response.statusCode == 200) {
-        print('API call successful: ${response.data}');
-        StorageBox.instance.setToken("value");
-        StorageBox.instance.setIsAdmin(email == "admin");
+        AuthResponse authResponse = AuthResponse.fromJson(response.data);
+        if (authResponse.status == true) {
+          AuthData authData = authResponse.data![0];
+          await StorageBox.instance.setUsername(email);
+          await StorageBox.instance.setPassword(password!);
+          await StorageBox.instance
+              .setFullName("${authData.firstName} ${authData.lastName}");
+          await StorageBox.instance.setProfilePic(authData.profileImage);
+          await StorageBox.instance.setUserId(authData.userId);
+          if (authData.userType?.toLowerCase() == "Customer".toLowerCase()) {
+            await StorageBox.instance.setIsAdmin(true);
+          } else if (authData.userType?.toLowerCase() ==
+              "Employee".toLowerCase()) {
+            await StorageBox.instance.setIsAdmin(false);
+          }
+          Get.off(() => HomeScreen());
+          Get.delete<AuthController>();
+        } else {
+          showToast(message: response.data['message']);
+        }
       } else {
-        StorageBox.instance.setToken("123");
-        StorageBox.instance.setIsAdmin(email == "admin");
-        print('API call failed: ${response.statusMessage}');
         showToast(message: response.statusMessage ?? networkErrorMsg);
       }
     } catch (e) {
-      StorageBox.instance.setToken("123");
-      StorageBox.instance.setIsAdmin(email == "admin");
-      print('Network error occurred: $e');
+      dismissLoader();
       showToast(message: e.toString());
-      StorageBox.instance.setUserName("Prudhvi Sai");
-      Get.off(() => HomeScreen());
-      Get.delete<AuthController>();
     }
+  }
+
+  void autoLogin() {
+    final username = StorageBox.instance.getUsername();
+    final password = StorageBox.instance.getPassword();
+    emailTextController.text = username;
+    passwordTextController.text = aesDecrypt(password) ?? '';
+    authenticate(username, password);
   }
 }

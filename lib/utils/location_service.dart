@@ -1,7 +1,8 @@
 import 'dart:io';
 
-import 'package:e_track/network/api_service.dart';
 import 'package:e_track/utils/global.dart';
+import 'package:e_track/utils/storagebox.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:flutter_background_service_android/flutter_background_service_android.dart';
@@ -10,8 +11,6 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:location/location.dart';
-
-import '../models/user.dart';
 import 'strings.dart';
 
 Future<bool> handleLocationPermission(bool isSilent) async {
@@ -53,9 +52,9 @@ Future<bool> handleLocationPermission(bool isSilent) async {
 Future<LatLng?> getCurrentPosition() async {
   try {
     Position? ld = await Geolocator.getCurrentPosition();
-    return LatLng(ld?.latitude ?? 0.0, ld?.longitude ?? 0.0);
+    return LatLng(ld.latitude ?? 0.0, ld.longitude ?? 0.0);
   } catch (e) {
-    print(e);
+    kPrintLog(e);
     return null;
   }
 }
@@ -67,7 +66,7 @@ Future<void> initializeService() async {
   const AndroidNotificationChannel channel = AndroidNotificationChannel(
     appName, // id
     notificationTitle, // title
-    importance: Importance.low, // importance must be at low or higher level
+    importance: Importance.high, // importance must be at low or higher level
   );
 
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
@@ -172,18 +171,20 @@ Future<void> getLocation(
   String body = "";
   if (position != null) {
     body = "last synced at ${DateFormat("hh:mm a").format(DateTime.now())}";
-    print('FLUTTER BACKGROUND SERVICE: ${DateTime.now()}');
+    kPrintLog('FLUTTER BACKGROUND SERVICE: ${DateTime.now()}');
+    /*try {
+      // API Call
+      final response =
+          await ApiService.instance.request('/users', DioMethod.get);
+      final List<UserResponse> users = response.data
+          .map<UserResponse>((e) => UserResponse.fromJson(e))
+          .toList();
 
-    // API Call
-    final response = await ApiService.instance.request('/users', DioMethod.get);
-    final List<UserResponse> users = response.data
-        .map<UserResponse>((e) => UserResponse.fromJson(e))
-        .toList();
-
-    print(users.map((e) => e.name));
+    } catch (e) {
+    }*/
   } else {
     body = "Problem occurred, please check mobile GPS";
-    print('FLUTTER BACKGROUND SERVICE Error: ${DateTime.now()}');
+    kPrintLog('FLUTTER BACKGROUND SERVICE Error: ${DateTime.now()}');
   }
 
   flutterLocalNotificationsPlugin.show(
@@ -200,7 +201,9 @@ Future<void> getLocation(
     ),
   );
   await Future.delayed(const Duration(seconds: 30));
+  // if (StorageBox.instance.getBackgroundFetchEnabled()) {
   getLocation(flutterLocalNotificationsPlugin);
+  // }
 }
 
 Future<bool> isLocationServiceRunning() async {
@@ -211,12 +214,14 @@ Future<bool> isLocationServiceRunning() async {
 
 Future<void> stopLocationService() async {
   if (await isLocationServiceRunning()) {
+    await StorageBox.instance.setBackgroundFetchEnable(false);
     FlutterBackgroundService().invoke("stopService");
   }
 }
 
 Future<void> startLocationService() async {
   if (!await isLocationServiceRunning()) {
+    await StorageBox.instance.setBackgroundFetchEnable(true);
     var service = FlutterBackgroundService();
     service.invoke("setAsForeground");
     service.startService();
@@ -227,7 +232,7 @@ void retrieveLatLng() async {
   final hasPermission = await handleLocationPermission(false);
   if (!hasPermission) return;
   LatLng? position = await getCurrentPosition();
-  print("Sign In ${position?.latitude} ${position?.longitude}");
+  kPrintLog("Sign In ${position?.latitude} ${position?.longitude}");
   // call sign in API
 
   if (await isLocationServiceRunning()) {

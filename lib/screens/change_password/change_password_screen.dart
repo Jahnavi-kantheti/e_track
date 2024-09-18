@@ -1,10 +1,13 @@
+import 'package:e_track/screens/change_password/change_password_controller.dart';
 import 'package:e_track/screens/common/edittext.dart';
 import 'package:e_track/screens/common/mybutton.dart';
 import 'package:e_track/utils/colors.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class ChangePasswordScreen extends StatelessWidget {
-  const ChangePasswordScreen({super.key});
+  ChangePasswordScreen({super.key});
+  final controller = Get.put(ChangePasswordController());
 
   @override
   Widget build(BuildContext context) {
@@ -25,24 +28,27 @@ class ChangePasswordScreen extends StatelessWidget {
             children: [
               EditText(
                 label: "Current password",
-                controller: TextEditingController(),
+                controller: controller.currentPasswordController,
                 isPassword: true,
+                mandatory: true,
               ),
               const SizedBox(
                 height: 10,
               ),
               EditText(
                 label: "New password",
-                controller: TextEditingController(),
+                controller: controller.newPasswordController,
                 isPassword: true,
+                mandatory: true,
               ),
               const SizedBox(
                 height: 10,
               ),
               EditText(
                 label: "Confirm password",
-                controller: TextEditingController(),
+                controller: controller.confirmPasswordController,
                 isPassword: true,
+                mandatory: true,
               ),
               const SizedBox(
                 height: 10,
@@ -57,7 +63,7 @@ class ChangePasswordScreen extends StatelessWidget {
         child: MyButton(
             label: "Save",
             onPress: () {
-
+              controller.updatePassword();
             }),
       ),
     );
